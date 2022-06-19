@@ -1,20 +1,21 @@
 package com.itheima.reggie.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.Employee;
 import com.itheima.reggie.service.EmployeeService;
+import com.sun.crypto.provider.HmacMD5;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 
 /**
  * description EmployeeController 控制层
@@ -91,5 +92,58 @@ public class EmployeeController {
         HttpSession session = request.getSession();
         session.removeAttribute("employee");
         return R.success("退出成功");
+    }
+
+    /***
+     * description: 新增员工
+     * @param employee 员工信息
+     * @return com.itheima.reggie.common.R<java.lang.String>
+     * @throws
+     * @author zhongweileex
+     * @date: 2022/6/19 - 20:20
+     */
+    @PostMapping
+    public R<String> save(HttpServletRequest request,@RequestBody Employee employee){
+        log.info("新增员工信息，{}" ,employee.toString());
+        //设置初始密码 123456 并且通过 md5 加密
+        employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes(StandardCharsets.UTF_8)));
+
+        employee.setCreateTime(LocalDateTime.now());
+        employee.setUpdateTime(LocalDateTime.now());
+
+        Long empID = (Long) request.getSession().getAttribute("employee");
+        employee.setCreateUser(empID);
+        employee.setUpdateUser(empID);
+
+        //向数据库中保存这个新增员工
+        employeeService.save(employee);
+        return R.success("新增员工成功");
+    }
+
+    //页面需要什么数据 ， 就要返回什么数据
+    /***
+     * description: 员工信息分页查询
+     * @param page description
+     * @param pageSize description
+     * @param name description
+     * @return com.itheima.reggie.common.R<com.baomidou.mybatisplus.extension.plugins.pagination.Page>
+     * @throws
+     * @author zhongweileex
+     * @date: 2022/6/19 - 21:46
+     */
+    @GetMapping("/page")
+    public R<Page> page(int page,int pageSize,String name){
+        log.info("page = {},pageSize = {},name = {}",page,pageSize,name);
+        //构造分页条件
+        Page<Employee> pageInfo = new Page<>(page, pageSize);
+        //构造条件构造器
+        LambdaQueryWrapper<Employee> queryWrapper = new LambdaQueryWrapper<>();
+        //添加过滤条件 where 子句相当于
+        queryWrapper.like(StringUtils.isNotEmpty(name),Employee::getName,name);
+        //添加排序条件 order by updateTime
+        queryWrapper.orderByDesc(Employee::getUpdateTime);
+        //起到分页功能
+        employeeService.page(pageInfo,queryWrapper);
+        return R.success(pageInfo);
     }
 }

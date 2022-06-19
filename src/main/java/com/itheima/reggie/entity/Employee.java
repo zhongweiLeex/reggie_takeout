@@ -7,7 +7,10 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 员工实体类
+ * 员工实体类 <p>
+ *     实现了 Serializable接口 将结果转换成JSON格式， 返回给前端
+ * </p>
+ *
  */
 @Data
 public class Employee implements Serializable {
