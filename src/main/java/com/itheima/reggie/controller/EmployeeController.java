@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -78,5 +79,17 @@ public class EmployeeController {
         //登录成功，将员工Id存放到session 并返回登录成功结果
         request.getSession().setAttribute("employee",emp.getId());
         return R.success(emp);
+    }
+
+    /**
+     * 退出并且清理当前当前保存登陆员工的sessionID
+     * @param request request请求
+     * @return "R"
+     */
+    @PostMapping("/logout")
+    public R<String> logout(HttpServletRequest request){
+        HttpSession session = request.getSession();
+        session.removeAttribute("employee");
+        return R.success("退出成功");
     }
 }

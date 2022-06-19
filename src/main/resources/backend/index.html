@@ -117,7 +117,7 @@
             defAct: '2',
             menuActived: '2',
             userInfo: {},
-            menuList: [
+            menuList: [//左侧选项名称
               // {
               //   id: '1',
               //   name: '门店管理',
@@ -180,7 +180,7 @@
         methods: {
           logout() {
             logoutApi().then((res)=>{
-              if(res.code === 1){
+              if(res.code === 1){//R.success("退出成功") 设置code = 1 进入此处逻辑 将浏览器本地存储 直接removeItem
                 localStorage.removeItem('userInfo')
                 window.location.href = '/backend/page/login/login.html'
               }
@@ -209,6 +209,7 @@
           }
         }
       })
+
     </script>
   </body>
 </html>
