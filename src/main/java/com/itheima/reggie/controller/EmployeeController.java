@@ -2,6 +2,7 @@ package com.itheima.reggie.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.itheima.reggie.common.JacksonObjectMapper;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.Employee;
 import com.itheima.reggie.service.EmployeeService;
@@ -108,21 +109,24 @@ public class EmployeeController {
         //设置初始密码 123456 并且通过 md5 加密
         employee.setPassword(DigestUtils.md5DigestAsHex("123456".getBytes(StandardCharsets.UTF_8)));
 
+/*
+        使用mybatisplus 自动填充
         employee.setCreateTime(LocalDateTime.now());
         employee.setUpdateTime(LocalDateTime.now());
 
+        获取当前用户登录ID
         Long empID = (Long) request.getSession().getAttribute("employee");
         employee.setCreateUser(empID);
         employee.setUpdateUser(empID);
+*/
 
         //向数据库中保存这个新增员工
         employeeService.save(employee);
         return R.success("新增员工成功");
     }
 
-    //页面需要什么数据 ， 就要返回什么数据
     /***
-     * description: 员工信息分页查询
+     * description: 员工信息分页查询，页面需要什么数据 ， 就要返回什么数据
      * @param page description
      * @param pageSize description
      * @param name description
@@ -145,5 +149,54 @@ public class EmployeeController {
         //起到分页功能
         employeeService.page(pageInfo,queryWrapper);
         return R.success(pageInfo);
+    }
+    /***
+     * description: <p>
+     *     根据用户ID，更改用户信息，
+     * </p>
+     * <p>
+     *     账号启用/禁用
+     * </p>
+     * <p>
+     *     用户信息修改
+     * </p>
+     * @param request request请求
+     * @param employee 从前端来的JSON数据
+     * @return com.itheima.reggie.common.R<java.lang.String>
+     * @throws
+     * @author zhongweileex
+     * @date: 2022/6/20 - 8:05
+     */
+    //putmapping 倾向于 更新信息 ， postmapping 倾向于添加信息
+    //@RequestBody 主要用于接收前端传递给后端的JSON字符串的数据
+    @PutMapping
+    public R<String> update(HttpServletRequest request,@RequestBody Employee employee){
+        log.info(employee.toString());
+        /*
+            Long empId = (Long) request.getSession().getAttribute("employee");
+            employee.setUpdateTime(LocalDateTime.now());
+            employee.setUpdateUser(empId);
+        */
+
+        employeeService.updateById(employee);
+        return R.success("员工信息修改成功");
+    }
+    /***
+     * description: 根据ID查询员工信息
+     * @param id pathVariable 表示路径变量， 此变量在请求路径中，且 此处的跟新修改， 在前端中复用了上面的 update方法
+     * @return com.itheima.reggie.common.R<com.itheima.reggie.entity.Employee>
+     * @throws
+     * @author zhongweileex
+     * @date: 2022/6/20 - 14:22
+     */
+    @GetMapping("/{id}")
+    //PathVariable 表示路径变量， 表示此变量在请求路径中
+    public R<Employee> getById(@PathVariable Long id){
+        log.info("根据ID查询员工信息");
+        Employee employee = employeeService.getById(id);
+        if(employee == null){
+            return R.error("没有查询到员工信息");
+        }
+        return R.success(employee);
     }
 }

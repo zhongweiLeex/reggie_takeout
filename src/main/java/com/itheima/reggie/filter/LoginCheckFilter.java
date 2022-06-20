@@ -1,6 +1,7 @@
 package com.itheima.reggie.filter;
 
 import com.alibaba.fastjson.JSON;
+import com.itheima.reggie.common.BaseContext;
 import com.itheima.reggie.common.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.AntPathMatcher;
@@ -20,7 +21,7 @@ import java.io.IOException;
  * @author Administrator
  * @date 2022/6/19-18:57
  */
-@WebFilter(filterName = "loginCheckFilter",urlPatterns = "/*") //所有请求都拦截
+@WebFilter(filterName = "loginCheckFilter",urlPatterns = "/*") //所有请求都过滤
 @Slf4j
 public class LoginCheckFilter implements Filter {
     //路径匹配器,支持通配符
@@ -58,6 +59,7 @@ public class LoginCheckFilter implements Filter {
         }
         //4. 判断是否用户已经登录， 如果已经登录 则直接放行
         Object employeeID = request.getSession().getAttribute("employee");
+        BaseContext.setCurrentId((Long) employeeID);//设置用户ID 存储到 ThreadLocal中
         if(employeeID!=null){
             log.info("用户已登录，用户ID为{}",employeeID);
             filterChain.doFilter(request, response);
@@ -72,7 +74,7 @@ public class LoginCheckFilter implements Filter {
      * description: 判断当前的URI是否处于 排除是排除在外的URI
      * @param outURIs 排除在拦截之外的URI
      * @param requestURI 浏览器端发来的请求
-     * @return boolean true - 此请求URI 不需要排除在拦截器之外
+     * @return boolean true - 此请求URI 不需要排除在过滤器之外
      * @throws
      * @author zhongweileex
      * @date: 2022/6/19 - 19:20
