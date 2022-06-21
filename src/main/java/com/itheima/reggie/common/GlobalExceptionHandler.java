@@ -43,4 +43,18 @@ public class GlobalExceptionHandler {
         return R.error("未知错误");
     }
 
+    /***
+     * description: 自定义异常处理器
+     * @param ex description
+     * @return com.itheima.reggie.common.R<java.lang.String>
+     * @throws
+     * @author zhongweileex
+     * @date: 2022/6/20 - 20:32
+     */
+    @ExceptionHandler(CustomException.class) //表示此方法为异常处理类
+    public R<String> customExceptionHandler(CustomException ex){
+        log.error(ex.getMessage());
+        return R.error(ex.getMessage());
+    }
+
 }

@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @Component
 public class MyMetaObjectHandler implements MetaObjectHandler {
     /***
-     * description: 插入操作自动填充
+     * description: 插入操作自动填充具有 @TableField 字段的元数据
      * @param metaObject 传入的元数据
      * @return void
      * @throws
