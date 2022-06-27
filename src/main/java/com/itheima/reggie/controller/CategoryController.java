@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * description 分配管理
  *
@@ -93,5 +95,30 @@ public class CategoryController {
         log.info("修改分类信息");
         categoryService.updateById(category);
         return R.success("修改分类信息成功");
+    }
+
+    /***
+     * description: 根据条件查询分类数据  + 下拉菜单
+     * @param category description
+     * @return com.itheima.reggie.common.R<java.util.List < com.itheima.reggie.entity.Category>>
+     * @throws
+     * @author zhongweileex
+     * @date: 2022/6/21 - 11:16
+     */
+    @GetMapping("list")
+    public R<List<Category>> list(Category category){
+        //条件构造器
+        LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
+        //添加种类条件
+        //condition 表示 只有 category.getType() ！= null 的时候 后面的想等条件才会被应用
+        //Category::getType 获得数据库中的对应的列的值
+        //category.getType 从浏览器传过来的请求的值
+        queryWrapper.eq(category.getType()!=null,Category::getType,category.getType());
+        //添加排序条件
+        queryWrapper.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
+
+        List<Category> list = categoryService.list(queryWrapper);
+        return R.success(list);
+
     }
 }

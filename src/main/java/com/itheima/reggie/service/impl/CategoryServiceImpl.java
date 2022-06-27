@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * description TODO
+ * description CategoryServiceImpl 对数据库的CRUD
  *
  * @author Administrator
  * @date 2022/6/20-16:27
@@ -36,9 +36,13 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper, Category> i
     @Autowired
     private SetmealService setmealService;
 
-    /**
-     * 根据id删除分类，删除之前需要进行判断
-     * @param id
+    /***
+     * description: 根据id删除分类，删除之前需要进行判断 是否已经关联了其他菜品，如果关联了则删除失败 抛出异常
+     * @param id 需要删除的菜品id
+     * @return void
+     * @throws
+     * @author zhongweileex
+     * @date: 2022/6/21 - 11:00
      */
     @Override
     public void remove(Long id) {

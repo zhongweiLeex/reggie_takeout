@@ -390,7 +390,7 @@
           // 获取菜品分类
           getDishList () {
             getCategoryList({ 'type': 1 }).then(res => {
-              if (res.code === 1) {
+              if (res.code === 1) {//1表示菜品分类 2 表示套餐分类
                 this.dishList = res.data
               } else {
                 this.$message.error(res.msg || '操作失败')

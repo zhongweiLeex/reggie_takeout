@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * description 启动类
@@ -14,6 +15,7 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 @Slf4j
 @SpringBootApplication
 @ServletComponentScan//扫描 webFilter之类的注解
+@EnableTransactionManagement //开启事务支持
 public class ReggieApplication {
     public static void main(String[] args) {
         SpringApplication.run(ReggieApplication.class,args);
