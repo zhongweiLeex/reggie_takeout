@@ -21,71 +21,82 @@ import java.io.IOException;
  * @author Administrator
  * @date 2022/6/19-18:57
  */
-@WebFilter(filterName = "loginCheckFilter",urlPatterns = "/*") //所有请求都过滤
+@WebFilter(filterName = "loginCheckFilter",urlPatterns = "/*")
 @Slf4j
-public class LoginCheckFilter implements Filter {
-    //路径匹配器,支持通配符
+public class LoginCheckFilter implements Filter{
+    //路径匹配器，支持通配符
     public static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
+
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
-        /*
-        * 1.获取本次请求URI
-        * 2. 判断本次请求是否需要处理
-        * 3. 如果不需要， 则直接放行
-        * 4. 判断登录状态， 判断是否登录， 如果已经登录 则放行
-        * 5. 如果没有登录则， 通过输出流 向客户端页面响应数据
-        * */
-        String requestURI = request.getRequestURI();
+
+        //1、获取本次请求的URI
+        String requestURI = request.getRequestURI();// /backend/index.html
+
         log.info("拦截到请求：{}",requestURI);
 
-        //不做拦截处理的URI
-        String[] outURIs = {
+        //定义不需要处理的请求路径
+        String[] urls = new String[]{
                 "/employee/login",
                 "/employee/logout",
                 "/backend/**",
                 "/front/**",
-                //文件上传可以写道此处， 不需要过滤
                 "/common/**",
                 "/user/sendMsg",
                 "/user/login"
         };
 
-        //2.判断本次请求是否需要处理
-        boolean noNeedHandle = check(outURIs,requestURI);
+        //2、判断本次请求是否需要处理
+        boolean check = check(urls, requestURI);
 
-        //3. 如果不需要处理， 直接放行
-        if(noNeedHandle){
-            log.info("本次对于 {} 不需要处理，直接放行",requestURI);
+        //3、如果不需要处理，则直接放行
+        if(check){
+            log.info("本次请求{}不需要处理",requestURI);
             filterChain.doFilter(request,response);
             return;
         }
-        //4. 判断是否用户已经登录， 如果已经登录 则直接放行
-        Object employeeID = request.getSession().getAttribute("employee");
-        BaseContext.setCurrentId((Long) employeeID);//设置用户ID 存储到 ThreadLocal中
-        if(employeeID!=null){
-            log.info("用户已登录，用户ID为{}",employeeID);
-            filterChain.doFilter(request, response);
+
+        //4-1、判断登录状态，如果已登录，则直接放行
+        if(request.getSession().getAttribute("employee") != null){
+            log.info("用户已登录，用户id为：{}",request.getSession().getAttribute("employee"));
+
+            Long empId = (Long) request.getSession().getAttribute("employee");
+            BaseContext.setCurrentId(empId);
+
+            filterChain.doFilter(request,response);
             return;
         }
-        //5. 用户未登录，则通过输出流方式响应客户端页面响应数据
+
+        //4-2、判断登录状态，如果已登录，则直接放行
+        if(request.getSession().getAttribute("user") != null){
+            log.info("用户已登录，用户id为：{}",request.getSession().getAttribute("user"));
+
+            Long userId = (Long) request.getSession().getAttribute("user");
+            BaseContext.setCurrentId(userId);
+
+            filterChain.doFilter(request,response);
+            return;
+        }
+
         log.info("用户未登录");
+        //5、如果未登录则返回未登录结果，通过输出流方式向客户端页面响应数据
         response.getWriter().write(JSON.toJSONString(R.error("NOTLOGIN")));
+        return;
+
     }
 
-    /***
-     * description: 判断当前的URI是否处于 排除是排除在外的URI
-     * @param outURIs 排除在拦截之外的URI
-     * @param requestURI 浏览器端发来的请求
-     * @return boolean true - 此请求URI 不需要排除在过滤器之外
-     * @throws
-     * @author zhongweileex
-     * @date: 2022/6/19 - 19:20
+    /**
+     * 路径匹配，检查本次请求是否需要放行
+     * @param urls
+     * @param requestURI
+     * @return
      */
-    private boolean check(String[] outURIs, String requestURI) {
-        for(String outURI : outURIs){
-            if(PATH_MATCHER.match(outURI,requestURI)){
+    public boolean check(String[] urls,String requestURI){
+        for (String url : urls) {
+            boolean match = PATH_MATCHER.match(url, requestURI);
+            if(match){
                 return true;
             }
         }

@@ -36,7 +36,7 @@ public class UserController {
         String phone = user.getPhone();
 
         if(StringUtils.isNotEmpty(phone)){
-            //生成随机的4位验证码
+//            //生成随机的4位验证码
             String code = ValidateCodeUtils.generateValidateCode(4).toString();
             log.info("code={}",code);
 
@@ -72,8 +72,10 @@ public class UserController {
         Object codeInSession = session.getAttribute(phone);
 
         //进行验证码的比对（页面提交的验证码和Session中保存的验证码比对）
-        if(codeInSession != null && codeInSession.equals(code)){
-            //如果能够比对成功，说明登录成功
+//        if(codeInSession != null && codeInSession.equals(code)){
+        //直接不验证了
+//        if(codeInSession == null){
+//            //如果能够比对成功，说明登录成功
 
             LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(User::getPhone,phone);
@@ -89,7 +91,7 @@ public class UserController {
             session.setAttribute("user",user.getId());
             return R.success(user);
         }
-        return R.error("登录失败");
-    }
+//        return R.error("登录失败");
+//    }
 
 }

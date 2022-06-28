@@ -4,19 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.entity.Category;
-import com.itheima.reggie.entity.Employee;
 import com.itheima.reggie.service.CategoryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /**
- * description 分配管理
- *
- * @author Administrator
- * @date 2022/6/20-16:20
+ * 分类管理
  */
 @RestController
 @RequestMapping("/category")
@@ -25,13 +22,10 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
-    /***
-     * description: save 新增分类
-     * @param category 前端传入的JSON字符串
-     * @return com.itheima.reggie.common.R<java.lang.String>
-     * @throws
-     * @author zhongweileex
-     * @date: 2022/6/20 - 17:00
+    /**
+     * 新增分类
+     * @param category
+     * @return
      */
     @PostMapping
     public R<String> save(@RequestBody Category category){
@@ -40,20 +34,16 @@ public class CategoryController {
         return R.success("新增分类成功");
     }
 
-    /***
-     * description: 分页方法
-     * @param page description
-     * @param pageSize description
-     * @return com.itheima.reggie.common.R<com.baomidou.mybatisplus.extension.plugins.pagination.Page < com.itheima.reggie.entity.Category>>
-     * @throws
-     * @author zhongweileex
-     * @date: 2022/6/20 - 20:00
+    /**
+     * 分页查询
+     * @param page
+     * @param pageSize
+     * @return
      */
     @GetMapping("/page")
-    public R<Page<Category>> page(int page, int pageSize){
+    public R<Page> page(int page,int pageSize){
         //分页构造器
         Page<Category> pageInfo = new Page<>(page,pageSize);
-
         //条件构造器
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
         //添加排序条件，根据sort进行排序
@@ -65,60 +55,49 @@ public class CategoryController {
     }
 
     /**
-     * description: 根据ids 删除分类
-     * @param ids description
-     * @return com.itheima.reggie.common.R<java.lang.String>
-     * @throws
-     * @author zhongweileex
-     * @date: 2022/6/20 - 19:49
+     * 根据id删除分类
+     * @param id
+     * @return
      */
     @DeleteMapping
-    //因为前端只需要一个 String （code） 所以只需要返回string就好了
-    public R<String> delete(Long ids){//是通过 URL 传递的 不需要RequestBody
-        log.info("删除分类,{}",ids);
+    public R<String> delete(Long id){
+        log.info("删除分类，id为：{}",id);
 
-       //需要完善， 如果关联了菜品 ， 则无法删除 需要查询需要删除的分类是否已经关联了菜品
-       categoryService.remove(ids);//调用的时 CategoryServiceImpl中的remove方法
-       return R.success("分类信息删除成功");
+        //categoryService.removeById(id);
+        categoryService.remove(id);
+
+        return R.success("分类信息删除成功");
     }
 
-    /***
-     * description: 根据ID修改分类信息
-     * @param category description
-     * @return com.itheima.reggie.common.R<java.lang.String>
-     * @throws
-     * @author zhongweileex
-     * @date: 2022/6/20 - 20:56
+    /**
+     * 根据id修改分类信息
+     * @param category
+     * @return
      */
     @PutMapping
     public R<String> update(@RequestBody Category category){
-        log.info("修改分类信息");
+        log.info("修改分类信息：{}",category);
+
         categoryService.updateById(category);
+
         return R.success("修改分类信息成功");
     }
 
-    /***
-     * description: 根据条件查询分类数据  + 下拉菜单
-     * @param category description
-     * @return com.itheima.reggie.common.R<java.util.List < com.itheima.reggie.entity.Category>>
-     * @throws
-     * @author zhongweileex
-     * @date: 2022/6/21 - 11:16
+    /**
+     * 根据条件查询分类数据
+     * @param category
+     * @return
      */
-    @GetMapping("list")
+    @GetMapping("/list")
     public R<List<Category>> list(Category category){
         //条件构造器
         LambdaQueryWrapper<Category> queryWrapper = new LambdaQueryWrapper<>();
-        //添加种类条件
-        //condition 表示 只有 category.getType() ！= null 的时候 后面的想等条件才会被应用
-        //Category::getType 获得数据库中的对应的列的值
-        //category.getType 从浏览器传过来的请求的值
-        queryWrapper.eq(category.getType()!=null,Category::getType,category.getType());
+        //添加条件
+        queryWrapper.eq(category.getType() != null,Category::getType,category.getType());
         //添加排序条件
         queryWrapper.orderByAsc(Category::getSort).orderByDesc(Category::getUpdateTime);
 
         List<Category> list = categoryService.list(queryWrapper);
         return R.success(list);
-
     }
 }

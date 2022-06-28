@@ -9,7 +9,7 @@ package com.itheima.reggie.common;
 public class BaseContext {
     private static ThreadLocal<Long> threadLocal = new ThreadLocal<>();
 
-    /***
+    /**
      * description: setCurrentId 设置 threadLocal 存储用户id, 用户id 从session中获得
      * @param id 用户id
      * @return void
