@@ -106,7 +106,7 @@ public class DishController {
      */
     @GetMapping("/{id}")
     public R<DishDto> get(@PathVariable Long id){
-        //需要查询两张表格flavors = {ArrayList@7773}  size = 3
+        //需要查询两张表格
         DishDto dishDto = dishService.getByIdWithFlavor(id);//主要逻辑封装到 dishService中
         return R.success(dishDto);
     }
@@ -124,6 +124,30 @@ public class DishController {
         log.info(dishDto.toString());
         dishService.updateByIdWithFlavor(dishDto);
         return R.success("新增菜品成功");
+    }
+
+    /***
+     * description: 根据条件查询对应菜品数据
+     * @param dish description
+     * @return com.itheima.reggie.common.R<java.util.List < com.itheima.reggie.entity.Dish>>
+     * @throws
+     * @author zhongweileex
+     * @date: 2022/6/27 - 16:38
+     */
+    @GetMapping("/list")
+    public R<List<Dish>> list(Dish dish){
+        LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
+
+        //构造查询条件
+        queryWrapper.eq(dish.getCategoryId()!=null,Dish::getCategoryId,dish.getCategoryId());
+        queryWrapper.eq(Dish::getStatus,1);//查询状态为1 （在售状态）
+
+        //构造排序条件
+        queryWrapper.orderByAsc(Dish::getSort).orderByDesc(Dish::getUpdateTime);
+
+        List<Dish> list = dishService.list(queryWrapper);
+
+        return R.success(list);
     }
 
 }

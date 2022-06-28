@@ -47,7 +47,9 @@ public class LoginCheckFilter implements Filter {
                 "/backend/**",
                 "/front/**",
                 //文件上传可以写道此处， 不需要过滤
-                "/common/**"
+                "/common/**",
+                "/user/sendMsg",
+                "/user/login"
         };
 
         //2.判断本次请求是否需要处理
