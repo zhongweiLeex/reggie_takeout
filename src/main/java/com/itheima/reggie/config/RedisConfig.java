@@ -21,7 +21,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import java.time.Duration;
 
 /**
- * description Redis配置类
+ * description:  Redis配置类
  *
  * @author Administrator
  * @date 2022/6/29-14:57
@@ -30,6 +30,14 @@ import java.time.Duration;
 public class RedisConfig {
 
     @Bean
+    /**
+     * description: redisTemplate 自定义 redisTemplate 但是如果自己不配置 ， springboot 框架也会自动创建Bean对象
+     * @param redisConnectionFactory 连接工厂
+     * @return org.springframework.data.redis.core.RedisTemplate<java.lang.String, java.lang.Object>
+     * @throws
+     * @author zhongweileex
+     * @date: 2022/6/29 - 20:16
+     */
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory){
 
         RedisSerializer<Object> serializer = redisSerializer(); //使用自定义的 JSON序列化器 ， 默认使用 JDKSerializationRedisSerializer 序列化器
