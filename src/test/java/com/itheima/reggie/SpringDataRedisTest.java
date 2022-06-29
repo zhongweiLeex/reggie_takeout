@@ -18,8 +18,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 public class SpringDataRedisTest {
 
+//    实现看如下的帖子 https://segmentfault.com/a/1190000023040110
     @Autowired
-    private RedisTemplate redisTemplate;
+    private RedisTemplate redisTemplate; //自动注入 RedisTemplate
 
     @Test
     public void testString(){
