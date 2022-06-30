@@ -1,6 +1,8 @@
 package com.itheima.reggie.common;
 
 import lombok.Data;
+
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,7 +13,7 @@ import java.util.Map;
  * @param <T>
  */
 @Data
-public class R<T> {
+public class R<T> implements Serializable {
     //前端页面的登录方法
     private Integer code; //编码：1成功，0和其它数字为失败
     private String msg; //错误信息

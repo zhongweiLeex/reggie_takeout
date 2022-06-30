@@ -21,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -185,6 +187,10 @@ public class DishController {
     public R<List<DishDto>> list(Dish dish) throws IOException {
         List<DishDto> dishDtoList = null;
         //key : dish_categoryId_status
+/*        Integer status = dish.getStatus();
+        if(status == null){
+            status = 1;
+        }*/
         String key = "dish_" + dish.getCategoryId() + "_" + dish.getStatus();
 
         //反序列化

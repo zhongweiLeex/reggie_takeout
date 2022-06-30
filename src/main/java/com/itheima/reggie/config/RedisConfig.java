@@ -95,11 +95,10 @@ public class RedisConfig {
                 .entryTtl(Duration.ofDays(1)) //Duration.ZERO表示永不过期（此值一般建议必须设置）
                 //.disableKeyPrefix() // 禁用key的前缀
                 //.disableCachingNullValues() //禁止缓存null值
-
                 //=== 前缀我个人觉得是非常重要的，建议约定：注解缓存一个统一前缀、RedisTemplate直接操作的缓存一个统一前缀===
                 //.prefixKeysWith("baidu:") // 底层其实调用的还是computePrefixWith() 方法，只是它的前缀是固定的（默认前缀是cacheName，此方法是把它固定住，一般不建议使用固定的）
                 //.computePrefixWith(CacheKeyPrefix.simple()); // 使用内置的实现
-                //.computePrefixWith(cacheName -> "caching:" + cacheName) // 自己实现，建议这么使用(cacheName也保留下来了)
+//                .computePrefixWith(cacheName -> "caching:" + cacheName) // 自己实现，建议这么使用(cacheName也保留下来了)
                 ;
         //设置默认的cache组件
         RedisCacheManager redisCacheManager = RedisCacheManager.builder(redisConnectionFactory)
@@ -110,7 +109,6 @@ public class RedisConfig {
                 //.transactionAware() // 支持事务
                 .build();
         return redisCacheManager;
-//        return new RedisCacheManager(redisCacheWriter, redisCacheConfiguration);
     }
 
 }
