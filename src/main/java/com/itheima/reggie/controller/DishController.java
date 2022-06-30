@@ -1,7 +1,11 @@
 package com.itheima.reggie.controller;
 
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itheima.reggie.common.R;
 import com.itheima.reggie.dto.DishDto;
 import com.itheima.reggie.entity.Category;
@@ -10,12 +14,16 @@ import com.itheima.reggie.entity.DishFlavor;
 import com.itheima.reggie.service.CategoryService;
 import com.itheima.reggie.service.DishFlavorService;
 import com.itheima.reggie.service.DishService;
+import com.itheima.reggie.service.RedisService;
+import com.itheima.reggie.utils.JsonAnalysis;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.StringUtils;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,6 +42,12 @@ public class DishController {
 
     @Autowired
     private CategoryService categoryService;
+
+    @Autowired
+    private RedisService redisService;
+
+/*    @Autowired
+    private RedisCacheManager redisCacheManager;*/
 
     /**
      * 新增菜品
@@ -148,7 +162,25 @@ public class DishController {
     }*/
 
     @GetMapping("/list")
-    public R<List<DishDto>> list(Dish dish){
+    public R<List<DishDto>> list(Dish dish) throws IOException {
+        List<DishDto> dishDtoList = null;
+        //key : dish_categoryId_status
+        String key = "dish_" + dish.getCategoryId() + "_" + dish.getStatus();
+
+        //先从 redis中获取缓存数据
+//        dishDtoList = (List<DishDto>) redisService.get(key);
+//        dishDtoList = JSON.parseObject((String) redisService.get(key),new TypeReference<List<DishDto>>() {});
+        //反序列化
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonArray = objectMapper.writeValueAsString(redisService.get(key));
+//        log.info(jsonArray);
+        dishDtoList = objectMapper.readValue(jsonArray, new TypeReference<List<DishDto>>() {});
+//        dishDtoList = JsonAnalysis.analysis((String) redisService.get(key));
+        //如果存在 ， 直接返回 无需查询数据库
+        if (dishDtoList!=null){
+            return R.success(dishDtoList);
+        }
+
         //构造查询条件
         LambdaQueryWrapper<Dish> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(dish.getCategoryId() != null ,Dish::getCategoryId,dish.getCategoryId());
@@ -160,7 +192,7 @@ public class DishController {
 
         List<Dish> list = dishService.list(queryWrapper);
 
-        List<DishDto> dishDtoList = list.stream().map((item) -> {
+        dishDtoList = list.stream().map((item) -> {
             DishDto dishDto = new DishDto();
 
             BeanUtils.copyProperties(item,dishDto);
@@ -183,6 +215,9 @@ public class DishController {
             dishDto.setFlavors(dishFlavorList);
             return dishDto;
         }).collect(Collectors.toList());
+
+        //如果redis中的数据不存在， 则将查询到的数据库的数据 缓存到 Redis中
+        redisService.set(key,dishDtoList,60*60*60);
 
         return R.success(dishDtoList);
     }
