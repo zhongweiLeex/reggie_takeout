@@ -61,6 +61,16 @@ public class DishController {
 
         dishService.saveWithFlavor(dishDto);
 
+                /*
+        //清理所有菜品的缓存数据
+        Set<String> keys = redisService.keys("dish_*");
+        redisService.del(keys);
+        */
+
+        //清理某个分类下的菜品缓存
+        String key = "dish_" + dishDto.getCategoryId() + "_1";
+        redisService.del(key);
+
         return R.success("新增菜品成功");
     }
 
