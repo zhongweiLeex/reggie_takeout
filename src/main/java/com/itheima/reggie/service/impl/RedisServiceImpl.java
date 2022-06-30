@@ -18,32 +18,42 @@ import java.util.concurrent.TimeUnit;
  */
 @Service
 public class RedisServiceImpl implements RedisService {
-        @Autowired
-        private RedisTemplate<String, Object> redisTemplate;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
-        @Override
-        public void set(String key, Object value, long time) {
-            redisTemplate.opsForValue().set(key, value, time, TimeUnit.SECONDS);
-        }
+    @Override
+    public void set(String key, Object value, long time) {
+        redisTemplate.opsForValue().set(key, value, time, TimeUnit.SECONDS);
+    }
 
-        @Override
-        public void set(String key, Object value) {
-            redisTemplate.opsForValue().set(key, value);
-        }
+    @Override
+    public void set(String key, Object value) {
+        redisTemplate.opsForValue().set(key, value);
+    }
 
-        @Override
-        public Object get(String key) {
-            return redisTemplate.opsForValue().get(key);
-        }
+    @Override
+    public Object get(String key) {
+        return redisTemplate.opsForValue().get(key);
+    }
 
-        @Override
-        public Boolean del(String key) {
-            return redisTemplate.delete(key);
-        }
+    @Override
+    public Boolean del(String key) {
+        return redisTemplate.delete(key);
+    }
 
-        @Override
-        public Long del(List<String> keys) {
-            return redisTemplate.delete(keys);
+    @Override
+    public Long del(List<String> keys) {
+        return redisTemplate.delete(keys);
+    }
+
+    @Override
+    public Long del(Set<String> keys) {
+        return redisTemplate.delete(keys);
+    }
+
+    //获取所有的
+        public Set<String> keys(String pattern){
+            return redisTemplate.keys(pattern);
         }
 
         @Override

@@ -31,6 +31,7 @@ public interface RedisService {
      */
     Long del(List<String> keys);
 
+    Long del(Set<String> keys);
     /**
      * 设置过期时间
      */
@@ -45,6 +46,13 @@ public interface RedisService {
      * 判断是否有该属性
      */
     Boolean hasKey(String key);
+
+    /**
+     * 获取所有的符合 pattern 的keys
+     * @param pattern keys 的匹配模式
+     * @return
+     */
+    Set<String> keys(String pattern);
 
     /**
      * 按delta递增

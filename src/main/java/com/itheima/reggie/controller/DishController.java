@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -127,7 +128,7 @@ public class DishController {
     }
 
     /**
-     * 修改菜品
+     * 修改菜品 每次更新菜品之后 将redis的缓存中的数据全部清除
      * @param dishDto
      * @return
      */
@@ -136,6 +137,15 @@ public class DishController {
         log.info(dishDto.toString());
 
         dishService.updateByIdWithFlavor(dishDto);
+        /*
+        //清理所有菜品的缓存数据
+        Set<String> keys = redisService.keys("dish_*");
+        redisService.del(keys);
+        */
+
+        //清理某个分类下的菜品缓存
+        String key = "dish_" + dishDto.getCategoryId() + "_1";
+        redisService.del(key);
 
         return R.success("修改菜品成功");
     }
@@ -167,15 +177,10 @@ public class DishController {
         //key : dish_categoryId_status
         String key = "dish_" + dish.getCategoryId() + "_" + dish.getStatus();
 
-        //先从 redis中获取缓存数据
-//        dishDtoList = (List<DishDto>) redisService.get(key);
-//        dishDtoList = JSON.parseObject((String) redisService.get(key),new TypeReference<List<DishDto>>() {});
         //反序列化
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonArray = objectMapper.writeValueAsString(redisService.get(key));
-//        log.info(jsonArray);
         dishDtoList = objectMapper.readValue(jsonArray, new TypeReference<List<DishDto>>() {});
-//        dishDtoList = JsonAnalysis.analysis((String) redisService.get(key));
         //如果存在 ， 直接返回 无需查询数据库
         if (dishDtoList!=null){
             return R.success(dishDtoList);
